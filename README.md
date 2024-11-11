@@ -1,6 +1,7 @@
 # cvthls: convert video to hls
 
-cli to convert video files into HLS chunks and a playlist. upload them to R2/S3/etc with rclone.
+cli to convert video files into HLS chunks and a playlist. upload them to
+R2/S3/etc with rclone.
 
 adapted from
 [wesbos/R2-video-streaming](https://github.com/wesbos/R2-video-streaming)
