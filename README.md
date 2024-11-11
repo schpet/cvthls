@@ -1,12 +1,14 @@
 # cvthls: convert video to hls
 
-cli to convert video files
+cli to convert video files into HLS chunks and a playlist. upload them to
+R2/S3/etc with rclone.
 
 adapted from
 [wesbos/R2-video-streaming](https://github.com/wesbos/R2-video-streaming)
 
 > [!NOTE]
-> project is very much WIP, mostly just an excuse to mess around with deno and jsr
+> project is very much WIP, mostly just an excuse to mess around with deno and
+> jsr
 
 ## usage
 
@@ -16,7 +18,6 @@ deno run -A jsr:@schpet/cvthls
 
 # convert video to hls
 deno run -A jsr:@schpet/cvthls ./input/sample.mp4
-
 
 # convert video to hls
 deno run -A jsr:@schpet/cvthls ./input/sample.mp4

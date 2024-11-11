@@ -14,5 +14,8 @@
   "license": "MIT",
   "publish": {
     "include": ["src/**/*", "README.md"]
+  },
+  "fmt": {
+    "include": ["src/**/*", "README.md"]
   }
 }
