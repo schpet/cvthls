@@ -87,7 +87,11 @@ await new Command()
           const inputFilename = new URL(inputVideo, `file://${Deno.cwd()}/`)
             .pathname.split("/").pop()?.split(".")[0];
           if (inputFilename) {
-            const masterPlaylistPath = join(rcloneDest, inputFilename, "master.m3u8");
+            const masterPlaylistPath = join(
+              rcloneDest,
+              inputFilename,
+              "master.m3u8",
+            );
             console.log(masterPlaylistPath);
           }
         } catch (error) {

@@ -6,7 +6,8 @@ adapted from
 [wesbos/R2-video-streaming](https://github.com/wesbos/R2-video-streaming)
 
 > [!NOTE]
-> project is very much WIP, mostly just an excuse to mess around with deno and jsr
+> project is very much WIP, mostly just an excuse to mess around with deno and
+> jsr
 
 ## usage
 
