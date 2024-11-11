@@ -17,7 +17,6 @@ deno run -A jsr:@schpet/cvthls
 # convert video to hls
 deno run -A jsr:@schpet/cvthls ./input/sample.mp4
 
-
 # convert video to hls
 deno run -A jsr:@schpet/cvthls ./input/sample.mp4
 
