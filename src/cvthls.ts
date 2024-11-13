@@ -1,9 +1,13 @@
 import { Command } from "@cliffy/command";
 import { ensureDir } from "@std/fs";
 import { join } from "@std/path";
-import { PRESET_CONFIGS, PresetConfig, process_presets } from "./transcode.ts";
+import {
+  PRESET_CONFIGS,
+  type PresetConfig,
+  process_presets,
+} from "./transcode.ts";
 import { rcloneCopy } from "./utils.ts";
-import { generate, validate } from "@std/uuid/unstable-v7";
+import { generate } from "@std/uuid/unstable-v7";
 
 await new Command()
   .name("cvthls")
