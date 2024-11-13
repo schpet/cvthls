@@ -1,5 +1,5 @@
 import { Command, EnumType } from "@cliffy/command";
-import * as eta from "@eta-dev/eta";
+import { render } from "@eta-dev/eta";
 import { ensureDir } from "@std/fs";
 import { join } from "@std/path";
 import {
@@ -118,7 +118,7 @@ const command = new Command()
           new URL("./templates/player.eta", import.meta.url)
         );
         
-        const result = eta.render(template, { videoSrc: m3u8Url });
+        const result = render(template, { videoSrc: m3u8Url });
         
         await Deno.writeTextFile(outputFile, result);
         console.log(`Generated HTML player at: ${outputFile}`);
