@@ -1,5 +1,6 @@
 import { Command, EnumType } from "@cliffy/command";
-import { render } from "@eta-dev/eta";
+import { Eta } from "@eta-dev/eta";
+import { dirname } from "@std/path";
 import { ensureDir } from "@std/fs";
 import { join } from "@std/path";
 import {
@@ -114,11 +115,10 @@ const command = new Command()
     .arguments("<m3u8-url:string> [output-file:string]")
     .action(async (_, m3u8Url, outputFile = "player.html") => {
       try {
-        const template = await Deno.readTextFile(
-          new URL("./templates/player.eta", import.meta.url)
-        );
+        const templatesDir = dirname(new URL("./templates/player.eta", import.meta.url).pathname);
+        const eta = new Eta({ views: templatesDir });
         
-        const result = render(template, { videoSrc: m3u8Url });
+        const result = await eta.render("./player", { videoSrc: m3u8Url });
         
         await Deno.writeTextFile(outputFile, result);
         console.log(`Generated HTML player at: ${outputFile}`);
