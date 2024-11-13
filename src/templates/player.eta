@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>HLS Video Player</title>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="../static/hls.min.js"></script>
     <style>
         body {
             margin: 0;
