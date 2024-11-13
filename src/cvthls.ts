@@ -1,4 +1,5 @@
-import { Command } from "@cliffy/command";
+import { Command, EnumType } from "@cliffy/command";
+import * as eta from "@eta-dev/eta";
 import { ensureDir } from "@std/fs";
 import { join } from "@std/path";
 import {
@@ -9,7 +10,7 @@ import {
 import { rcloneCopy } from "./utils.ts";
 import { generate } from "@std/uuid/unstable-v7";
 
-await new Command()
+const command = new Command()
   .name("cvthls")
   .version("0.1.0")
   .description("Converts video to stream")
@@ -108,4 +109,23 @@ await new Command()
       Deno.exit(1);
     }
   })
-  .parse(Deno.args);
+  .command("html", new Command()
+    .description("Generate an HTML page with HLS video player")
+    .arguments("<m3u8-url:string> [output-file:string]")
+    .action(async (_, m3u8Url, outputFile = "player.html") => {
+      try {
+        const template = await Deno.readTextFile(
+          new URL("./templates/player.eta", import.meta.url)
+        );
+        
+        const result = eta.render(template, { videoSrc: m3u8Url });
+        
+        await Deno.writeTextFile(outputFile, result);
+        console.log(`Generated HTML player at: ${outputFile}`);
+      } catch (error) {
+        console.error("Error generating HTML:", error);
+        Deno.exit(1);
+      }
+    }));
+
+await command.parse(Deno.args);
