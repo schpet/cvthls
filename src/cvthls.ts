@@ -121,7 +121,14 @@ const command = new Command()
         const result = await eta.render("./player", { videoSrc: m3u8Url });
         
         await Deno.writeTextFile(outputFile, result);
+        
+        // Copy hls.min.js to the same directory as the output file
+        const hlsSource = new URL("../static/hls.min.js", import.meta.url).pathname;
+        const hlsDestination = join(dirname(outputFile), "hls.min.js");
+        await Deno.copyFile(hlsSource, hlsDestination);
+        
         console.log(`Generated HTML player at: ${outputFile}`);
+        console.log(`Copied hls.min.js to: ${hlsDestination}`);
       } catch (error) {
         console.error("Error generating HTML:", error);
         Deno.exit(1);
