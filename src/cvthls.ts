@@ -3,6 +3,7 @@ import { Eta } from "@eta-dev/eta";
 import { dirname } from "@std/path";
 import { ensureDir } from "@std/fs";
 import { join } from "@std/path";
+import { serveDir } from "@std/http/file_server";
 import {
   PRESET_CONFIGS,
   type PresetConfig,
@@ -129,6 +130,19 @@ const command = new Command()
         
         console.log(`Generated HTML player at: ${outputFile}`);
         console.log(`Copied hls.min.js to: ${hlsDestination}`);
+
+        // Start HTTP server
+        const port = 8000;
+        console.log(`Starting HTTP server at http://localhost:${port}`);
+        
+        await Deno.serve({
+          port,
+          handler: (req) => {
+            return serveDir(req, {
+              fsRoot: dirname(outputFile),
+            });
+          },
+        });
       } catch (error) {
         console.error("Error generating HTML:", error);
         Deno.exit(1);
