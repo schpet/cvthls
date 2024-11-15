@@ -78,7 +78,8 @@ const command = new Command()
       }
 
       const inputUrl = new URL(inputVideo, `file://${Deno.cwd()}/`);
-      await process_presets(inputUrl, destination, options.preset);
+      const playlistPath = join(destination, inputFilename, PLAYLIST_FILENAME);
+      await process_presets(inputUrl, destination, options.preset, playlistPath);
 
       // If rclone destination is provided, copy the output
       if (options.rcloneDest) {

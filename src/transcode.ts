@@ -154,6 +154,7 @@ async function process_presets(
   input: URL,
   outputDir: string,
   presetConfig: PresetConfig = "standard",
+  playlistPath?: string,
 ) {
   console.time("process_presets");
   const input_extension = extname(input.pathname);
@@ -166,7 +167,8 @@ async function process_presets(
     results.push(transcode_result);
   }
   const playlist = await generate_playlist(results);
-  await writeFile(`${outputDir}/${input_filename}/master.m3u8`, playlist);
+  const finalPlaylistPath = playlistPath ?? `${outputDir}/${input_filename}/master.m3u8`;
+  await writeFile(finalPlaylistPath, playlist);
   console.timeEnd("process_presets");
 }
 
