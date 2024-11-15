@@ -123,7 +123,7 @@ const command = new Command()
           );
           const eta = new Eta({ views: templatesDir });
 
-          const result = await eta.render("./player", { videoSrc: m3u8Url });
+          const result = eta.render("./player", { videoSrc: m3u8Url });
 
           await Deno.writeTextFile(outputFile, result);
 
@@ -140,7 +140,7 @@ const command = new Command()
           const port = 8000;
           console.log(`Starting HTTP server at http://localhost:${port}`);
 
-          await Deno.serve({
+          Deno.serve({
             port,
             handler: (req) => {
               const pathname = new URL(req.url).pathname;
