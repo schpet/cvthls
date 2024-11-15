@@ -91,16 +91,16 @@ const command = new Command()
         try {
           await rcloneCopy(destination, rcloneDest, options.rcloneOverwrite);
           console.log(`\nCopied output:\n\n${rcloneDest}`);
-          // Get the input filename without extension to construct master.m3u8 path
+          // Get the input filename without extension to construct playlist.m3u8 path
           const inputFilename = new URL(inputVideo, `file://${Deno.cwd()}/`)
             .pathname.split("/").pop()?.split(".")[0];
           if (inputFilename) {
-            const masterPlaylistPath = join(
+            const playlistPath = join(
               rcloneDest,
               inputFilename,
               PLAYLIST_FILENAME,
             );
-            console.log(masterPlaylistPath);
+            console.log(playlistPath);
           }
         } catch (error) {
           console.error("Error copying to rclone destination:", error);
