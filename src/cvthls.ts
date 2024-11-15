@@ -1,6 +1,5 @@
 import { Command } from "@cliffy/command";
-import { Eta } from "@eta-dev/eta";
-import { dirname, join, relative } from "@std/path";
+import { join } from "@std/path";
 import { ensureDir } from "@std/fs";
 import { serveDir, serveFile } from "@std/http/file-server";
 import {
@@ -9,6 +8,7 @@ import {
   process_presets,
 } from "./transcode.ts";
 import { rcloneCopy } from "./utils.ts";
+import { generateHtmlPlayer, startHtmlServer } from "./html_generator.ts";
 import { generate } from "@std/uuid/unstable-v7";
 
 const command = new Command()
@@ -105,6 +105,24 @@ const command = new Command()
           // Don't exit here - the transcoding was successful
         }
       }
+
+      // Generate HTML player
+      const inputFilename = new URL(inputVideo, `file://${Deno.cwd()}/`)
+        .pathname.split("/").pop()?.split(".")[0];
+      
+      if (inputFilename) {
+        const masterM3u8Path = join(destination, inputFilename, "master.m3u8");
+        const htmlOutputPath = join(destination, "player.html");
+        
+        try {
+          const { outputFile, hlsDestination } = await generateHtmlPlayer(masterM3u8Path, htmlOutputPath);
+          console.log(`Generated HTML player at: ${outputFile}`);
+          console.log(`Copied hls.min.js to: ${hlsDestination}`);
+        } catch (error) {
+          console.error("Error generating HTML player:", error);
+          // Don't exit here - the transcoding was successful
+        }
+      }
     } catch (error) {
       console.error("Error processing video:", error);
       Deno.exit(1);
@@ -118,60 +136,9 @@ const command = new Command()
       )
       .arguments("<m3u8-file:string> [output-file:string]")
       .action(async (_, m3u8File, outputFile = "player.html") => {
-        // Verify m3u8 file exists
         try {
-          const stat = await Deno.stat(m3u8File);
-          if (!stat.isFile) {
-            throw new Error("M3U8 path exists but is not a file");
-          }
-        } catch (error) {
-          if (error instanceof Deno.errors.NotFound) {
-            throw new Error(`M3U8 file not found: ${m3u8File}`);
-          }
-          throw error;
-        }
-
-        // Calculate relative path from output HTML to m3u8 file
-        const m3u8Relative = join(
-          "..",
-          relative(dirname(outputFile), m3u8File),
-        );
-        try {
-          const templatesDir = dirname(
-            new URL("./templates/player.eta", import.meta.url).pathname,
-          );
-          const eta = new Eta({ views: templatesDir });
-
-          const result = eta.render("./player", { videoSrc: m3u8Relative });
-
-          await Deno.writeTextFile(outputFile, result);
-
-          // Copy hls.min.js to the same directory as the output file
-          const hlsSource =
-            new URL("../static/hls.min.js", import.meta.url).pathname;
-          const hlsDestination = join(dirname(outputFile), "hls.min.js");
-          await Deno.copyFile(hlsSource, hlsDestination);
-
-          console.log(`Generated HTML player at: ${outputFile}`);
-          console.log(`Copied hls.min.js to: ${hlsDestination}`);
-
-          // Start HTTP server
-          const port = 8000;
-          console.log(`Starting HTTP server at http://localhost:${port}`);
-
-          Deno.serve({
-            port,
-            handler: (req) => {
-              const pathname = new URL(req.url).pathname;
-              if (pathname === "/") {
-                return serveFile(req, outputFile);
-              }
-
-              return serveDir(req, {
-                fsRoot: dirname(outputFile),
-              });
-            },
-          });
+          const { outputFile: htmlFile } = await generateHtmlPlayer(m3u8File, outputFile);
+          await startHtmlServer(htmlFile);
         } catch (error) {
           console.error("Error generating HTML:", error);
           Deno.exit(1);
