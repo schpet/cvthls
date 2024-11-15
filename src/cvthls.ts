@@ -10,7 +10,7 @@ import {
   process_presets,
 } from "./transcode.ts";
 import { rcloneCopy } from "./utils.ts";
-import { generateHtmlPlayer, startHtmlServer } from "./html_generator.ts";
+import { generateHtmlPlayer, startHtmlServer } from "./html.ts";
 import { generate } from "@std/uuid/unstable-v7";
 
 const command = new Command()
