@@ -1,11 +1,19 @@
 import { Command } from "@cliffy/command";
-import { ensureDir } from "@std/fs";
-import { join } from "@std/path";
-import { PRESET_CONFIGS, PresetConfig, process_presets } from "./transcode.ts";
-import { rcloneCopy } from "./utils.ts";
-import { generate, validate } from "@std/uuid/unstable-v7";
 
-await new Command()
+const PLAYLIST_FILENAME = "playlist.m3u8";
+const PLAYER_FILENAME = "player.html";
+import { join } from "@std/path";
+import { ensureDir } from "@std/fs";
+import {
+  PRESET_CONFIGS,
+  type PresetConfig,
+  process_presets,
+} from "./transcode.ts";
+import { rcloneCopy } from "./utils.ts";
+import { generateHtmlPlayer, startHtmlServer } from "./html.ts";
+import { generate } from "@std/uuid/unstable-v7";
+
+const command = new Command()
   .name("cvthls")
   .version("0.1.0")
   .description("Converts video to stream")
@@ -70,32 +78,62 @@ await new Command()
       }
 
       const inputUrl = new URL(inputVideo, `file://${Deno.cwd()}/`);
-      await process_presets(inputUrl, destination, options.preset);
+      const inputFilename = inputUrl.pathname.split("/").pop()?.split(".")[0];
+      if (!inputFilename) {
+        throw new Error("Could not determine input filename");
+      }
+      const playlistPath = join(destination, inputFilename, PLAYLIST_FILENAME);
+      await process_presets(
+        inputUrl,
+        destination,
+        options.preset,
+        playlistPath,
+      );
 
-      // If rclone destination is provided, copy the output
-      if (options.rcloneDest) {
-        let rcloneDest = options.rcloneDest;
-        if (options.rcloneDestUuid) {
-          const id = generate();
-          rcloneDest = join(rcloneDest, id);
-        }
-        console.log("Copying output to rclone destination:", rcloneDest);
+      // Generate HTML player
+      if (inputFilename) {
+        const playlistM3u8Path = join(
+          destination,
+          inputFilename,
+          PLAYLIST_FILENAME,
+        );
+        const htmlOutputPath = join(
+          destination,
+          inputFilename,
+          PLAYER_FILENAME,
+        );
+
         try {
-          await rcloneCopy(destination, rcloneDest, options.rcloneOverwrite);
-          console.log(`\nCopied output:\n\n${rcloneDest}`);
-          // Get the input filename without extension to construct master.m3u8 path
-          const inputFilename = new URL(inputVideo, `file://${Deno.cwd()}/`)
-            .pathname.split("/").pop()?.split(".")[0];
-          if (inputFilename) {
-            const masterPlaylistPath = join(
-              rcloneDest,
-              inputFilename,
-              "master.m3u8",
-            );
-            console.log(masterPlaylistPath);
+          const { outputFile, hlsDestination } = await generateHtmlPlayer(
+            playlistM3u8Path,
+            htmlOutputPath,
+          );
+          console.log(`Generated HTML player at: ${outputFile}`);
+          console.log(`Copied hls.min.js to: ${hlsDestination}`);
+          startHtmlServer(outputFile);
+
+          // If rclone destination is provided, copy the output after HTML generation
+          if (options.rcloneDest) {
+            let rcloneDest = options.rcloneDest;
+            if (options.rcloneDestUuid) {
+              const id = generate();
+              rcloneDest = join(rcloneDest, id);
+            }
+            console.log("Copying output to rclone destination:", rcloneDest);
+            try {
+              await rcloneCopy(
+                destination,
+                rcloneDest,
+                options.rcloneOverwrite,
+              );
+              console.log("Copied output: ", rcloneDest);
+            } catch (error) {
+              console.error("Error copying to rclone destination:", error);
+              // Don't exit here - the transcoding was successful
+            }
           }
         } catch (error) {
-          console.error("Error copying to rclone destination:", error);
+          console.error("Error generating HTML player:", error);
           // Don't exit here - the transcoding was successful
         }
       }
@@ -104,4 +142,25 @@ await new Command()
       Deno.exit(1);
     }
   })
-  .parse(Deno.args);
+  .command(
+    "html",
+    new Command()
+      .description(
+        "Generate an HTML page with HLS video player from local m3u8 file",
+      )
+      .arguments("<m3u8-file:string> [output-file:string]")
+      .action(async (_, m3u8File, outputFile = PLAYER_FILENAME) => {
+        try {
+          const { outputFile: htmlFile } = await generateHtmlPlayer(
+            m3u8File,
+            outputFile,
+          );
+          startHtmlServer(htmlFile);
+        } catch (error) {
+          console.error("Error generating HTML:", error);
+          Deno.exit(1);
+        }
+      }),
+  );
+
+await command.parse(Deno.args);

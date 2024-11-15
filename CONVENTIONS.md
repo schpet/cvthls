@@ -1,0 +1,2 @@
+- runtime is deno
+- prefer dependies from jsr.io, suggest installing them with deno add
