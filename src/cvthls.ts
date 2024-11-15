@@ -1,4 +1,4 @@
-import { Command, EnumType } from "@cliffy/command";
+import { Command } from "@cliffy/command";
 import { Eta } from "@eta-dev/eta";
 import { dirname, join, relative } from "@std/path";
 import { ensureDir } from "@std/fs";
@@ -113,7 +113,9 @@ const command = new Command()
   .command(
     "html",
     new Command()
-      .description("Generate an HTML page with HLS video player from local m3u8 file")
+      .description(
+        "Generate an HTML page with HLS video player from local m3u8 file",
+      )
       .arguments("<m3u8-file:string> [output-file:string]")
       .action(async (_, m3u8File, outputFile = "player.html") => {
         // Verify m3u8 file exists
@@ -132,7 +134,7 @@ const command = new Command()
         // Calculate relative path from output HTML to m3u8 file
         const m3u8Relative = join(
           "..",
-          relative(dirname(outputFile), m3u8File)
+          relative(dirname(outputFile), m3u8File),
         );
         try {
           const templatesDir = dirname(
