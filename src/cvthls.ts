@@ -83,7 +83,12 @@ const command = new Command()
         throw new Error("Could not determine input filename");
       }
       const playlistPath = join(destination, inputFilename, PLAYLIST_FILENAME);
-      await process_presets(inputUrl, destination, options.preset, playlistPath);
+      await process_presets(
+        inputUrl,
+        destination,
+        options.preset,
+        playlistPath,
+      );
 
       // Generate HTML player
       if (inputFilename) {
@@ -116,14 +121,12 @@ const command = new Command()
             }
             console.log("Copying output to rclone destination:", rcloneDest);
             try {
-              await rcloneCopy(destination, rcloneDest, options.rcloneOverwrite);
-              console.log(`\nCopied output:\n\n${rcloneDest}`);
-              const playlistPath = join(
+              await rcloneCopy(
+                destination,
                 rcloneDest,
-                inputFilename,
-                PLAYLIST_FILENAME,
+                options.rcloneOverwrite,
               );
-              console.log(playlistPath);
+              console.log("Copied output: ", rcloneDest);
             } catch (error) {
               console.error("Error copying to rclone destination:", error);
               // Don't exit here - the transcoding was successful
