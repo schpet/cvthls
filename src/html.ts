@@ -19,11 +19,7 @@ export async function generateHtmlPlayer(
     throw error;
   }
 
-  // Calculate relative path from output HTML to m3u8 file
-  const m3u8Relative = join(
-    "..",
-    relative(dirname(outputFile), m3u8File),
-  );
+  const m3u8Relative = relative(dirname(outputFile), m3u8File);
 
   const templatesDir = dirname(
     new URL("./templates/player.eta", import.meta.url).pathname,
