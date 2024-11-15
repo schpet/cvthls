@@ -25,7 +25,7 @@ export const PRESET_CONFIGS = {
 
 export type PresetConfig = keyof typeof PRESET_CONFIGS;
 
-async function generate_playlist(transcode_results: TranscodeResult[]) {
+function generate_playlist(transcode_results: TranscodeResult[]) {
   const playlist = [`#EXTM3U`, `#EXT-X-VERSION:3`];
   for (const result of transcode_results) {
     console.log(
@@ -116,7 +116,7 @@ async function transcode(
       `${output_folder}/${input_filename}_${preset.resolution}_%03d.ts`,
     ])
     .output(m3u8_path)
-    .on("start", (cmdline: string) => {
+    .on("start", () => {
       console.log(`${preset.resolution}p start`);
       // console.log(cmdline)
     })
@@ -167,7 +167,8 @@ async function process_presets(
     results.push(transcode_result);
   }
   const playlist = await generate_playlist(results);
-  const finalPlaylistPath = playlistPath ?? `${outputDir}/${input_filename}/master.m3u8`;
+  const finalPlaylistPath = playlistPath ??
+    `${outputDir}/${input_filename}/master.m3u8`;
   await writeFile(finalPlaylistPath, playlist);
   console.timeEnd("process_presets");
 }
