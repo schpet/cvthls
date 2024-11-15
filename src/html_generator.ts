@@ -2,7 +2,10 @@ import { Eta } from "@eta-dev/eta";
 import { dirname, join, relative } from "@std/path";
 import { serveDir, serveFile } from "@std/http/file-server";
 
-export async function generateHtmlPlayer(m3u8File: string, outputFile = "player.html") {
+export async function generateHtmlPlayer(
+  m3u8File: string,
+  outputFile = "player.html",
+) {
   // Verify m3u8 file exists
   try {
     const stat = await Deno.stat(m3u8File);
@@ -39,7 +42,7 @@ export async function generateHtmlPlayer(m3u8File: string, outputFile = "player.
   return { outputFile, hlsDestination };
 }
 
-export async function startHtmlServer(outputFile: string, port = 8000) {
+export function startHtmlServer(outputFile: string, port = 8000) {
   console.log(`Starting HTTP server at http://localhost:${port}`);
 
   Deno.serve({

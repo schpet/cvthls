@@ -4,7 +4,6 @@ const PLAYLIST_FILENAME = "playlist.m3u8";
 const PLAYER_FILENAME = "player.html";
 import { join } from "@std/path";
 import { ensureDir } from "@std/fs";
-import { serveDir, serveFile } from "@std/http/file-server";
 import {
   PRESET_CONFIGS,
   type PresetConfig,
@@ -114,14 +113,25 @@ const command = new Command()
         .pathname.split("/").pop()?.split(".")[0];
 
       if (inputFilename) {
-        const masterM3u8Path = join(destination, inputFilename, PLAYLIST_FILENAME);
-        const htmlOutputPath = join(destination, inputFilename, PLAYER_FILENAME);
+        const masterM3u8Path = join(
+          destination,
+          inputFilename,
+          PLAYLIST_FILENAME,
+        );
+        const htmlOutputPath = join(
+          destination,
+          inputFilename,
+          PLAYER_FILENAME,
+        );
 
         try {
-          const { outputFile, hlsDestination } = await generateHtmlPlayer(masterM3u8Path, htmlOutputPath);
+          const { outputFile, hlsDestination } = await generateHtmlPlayer(
+            masterM3u8Path,
+            htmlOutputPath,
+          );
           console.log(`Generated HTML player at: ${outputFile}`);
           console.log(`Copied hls.min.js to: ${hlsDestination}`);
-          await startHtmlServer(outputFile);
+          startHtmlServer(outputFile);
         } catch (error) {
           console.error("Error generating HTML player:", error);
           // Don't exit here - the transcoding was successful
@@ -141,8 +151,11 @@ const command = new Command()
       .arguments("<m3u8-file:string> [output-file:string]")
       .action(async (_, m3u8File, outputFile = PLAYER_FILENAME) => {
         try {
-          const { outputFile: htmlFile } = await generateHtmlPlayer(m3u8File, outputFile);
-          await startHtmlServer(htmlFile);
+          const { outputFile: htmlFile } = await generateHtmlPlayer(
+            m3u8File,
+            outputFile,
+          );
+          startHtmlServer(htmlFile);
         } catch (error) {
           console.error("Error generating HTML:", error);
           Deno.exit(1);
