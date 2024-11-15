@@ -113,7 +113,7 @@ const command = new Command()
         .pathname.split("/").pop()?.split(".")[0];
 
       if (inputFilename) {
-        const masterM3u8Path = join(
+        const playlistM3u8Path = join(
           destination,
           inputFilename,
           PLAYLIST_FILENAME,
@@ -126,7 +126,7 @@ const command = new Command()
 
         try {
           const { outputFile, hlsDestination } = await generateHtmlPlayer(
-            masterM3u8Path,
+            playlistM3u8Path,
             htmlOutputPath,
           );
           console.log(`Generated HTML player at: ${outputFile}`);
