@@ -1,4 +1,6 @@
 import { Command } from "@cliffy/command";
+
+const PLAYLIST_FILENAME = "playlist.m3u8";
 import { join } from "@std/path";
 import { ensureDir } from "@std/fs";
 import { serveDir, serveFile } from "@std/http/file-server";
@@ -96,7 +98,7 @@ const command = new Command()
             const masterPlaylistPath = join(
               rcloneDest,
               inputFilename,
-              "playlist.m3u8",
+              PLAYLIST_FILENAME,
             );
             console.log(masterPlaylistPath);
           }
@@ -111,7 +113,7 @@ const command = new Command()
         .pathname.split("/").pop()?.split(".")[0];
 
       if (inputFilename) {
-        const masterM3u8Path = join(destination, inputFilename, "playlist.m3u8");
+        const masterM3u8Path = join(destination, inputFilename, PLAYLIST_FILENAME);
         const htmlOutputPath = join(destination, inputFilename, "player.html");
 
         try {
