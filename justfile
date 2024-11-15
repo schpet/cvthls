@@ -4,7 +4,7 @@ default:
     just run ./input/sample.mp4 ./output  --preset fast
 
 run *ARGS:
-    deno run --allow-env --allow-read --allow-write --allow-sys --allow-run {{entry}} {{ARGS}}
+    deno run --allow-net --allow-env --allow-read --allow-write --allow-sys --allow-run {{entry}} {{ARGS}}
 
 compile:
     deno compile --allow-env --allow-read --allow-write --allow-sys --allow-run {{entry}}

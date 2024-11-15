@@ -3,7 +3,7 @@ import { Eta } from "@eta-dev/eta";
 import { dirname } from "@std/path";
 import { ensureDir } from "@std/fs";
 import { join } from "@std/path";
-import { serveDir } from "@std/http/file_server";
+import { serveDir, serveFile } from "@std/http/file-server";
 import {
   PRESET_CONFIGS,
   type PresetConfig,
@@ -111,42 +111,53 @@ const command = new Command()
       Deno.exit(1);
     }
   })
-  .command("html", new Command()
-    .description("Generate an HTML page with HLS video player")
-    .arguments("<m3u8-url:string> [output-file:string]")
-    .action(async (_, m3u8Url, outputFile = "player.html") => {
-      try {
-        const templatesDir = dirname(new URL("./templates/player.eta", import.meta.url).pathname);
-        const eta = new Eta({ views: templatesDir });
-        
-        const result = await eta.render("./player", { videoSrc: m3u8Url });
-        
-        await Deno.writeTextFile(outputFile, result);
-        
-        // Copy hls.min.js to the same directory as the output file
-        const hlsSource = new URL("../static/hls.min.js", import.meta.url).pathname;
-        const hlsDestination = join(dirname(outputFile), "hls.min.js");
-        await Deno.copyFile(hlsSource, hlsDestination);
-        
-        console.log(`Generated HTML player at: ${outputFile}`);
-        console.log(`Copied hls.min.js to: ${hlsDestination}`);
+  .command(
+    "html",
+    new Command()
+      .description("Generate an HTML page with HLS video player")
+      .arguments("<m3u8-url:string> [output-file:string]")
+      .action(async (_, m3u8Url, outputFile = "player.html") => {
+        try {
+          const templatesDir = dirname(
+            new URL("./templates/player.eta", import.meta.url).pathname,
+          );
+          const eta = new Eta({ views: templatesDir });
 
-        // Start HTTP server
-        const port = 8000;
-        console.log(`Starting HTTP server at http://localhost:${port}`);
-        
-        await Deno.serve({
-          port,
-          handler: (req) => {
-            return serveDir(req, {
-              fsRoot: dirname(outputFile),
-            });
-          },
-        });
-      } catch (error) {
-        console.error("Error generating HTML:", error);
-        Deno.exit(1);
-      }
-    }));
+          const result = await eta.render("./player", { videoSrc: m3u8Url });
+
+          await Deno.writeTextFile(outputFile, result);
+
+          // Copy hls.min.js to the same directory as the output file
+          const hlsSource =
+            new URL("../static/hls.min.js", import.meta.url).pathname;
+          const hlsDestination = join(dirname(outputFile), "hls.min.js");
+          await Deno.copyFile(hlsSource, hlsDestination);
+
+          console.log(`Generated HTML player at: ${outputFile}`);
+          console.log(`Copied hls.min.js to: ${hlsDestination}`);
+
+          // Start HTTP server
+          const port = 8000;
+          console.log(`Starting HTTP server at http://localhost:${port}`);
+
+          await Deno.serve({
+            port,
+            handler: (req) => {
+              const pathname = new URL(req.url).pathname;
+              if (pathname === "/") {
+                return serveFile(req, outputFile);
+              }
+
+              return serveDir(req, {
+                fsRoot: dirname(outputFile),
+              });
+            },
+          });
+        } catch (error) {
+          console.error("Error generating HTML:", error);
+          Deno.exit(1);
+        }
+      }),
+  );
 
 await command.parse(Deno.args);
