@@ -85,34 +85,6 @@ const command = new Command()
       const playlistPath = join(destination, inputFilename, PLAYLIST_FILENAME);
       await process_presets(inputUrl, destination, options.preset, playlistPath);
 
-      // If rclone destination is provided, copy the output
-      if (options.rcloneDest) {
-        let rcloneDest = options.rcloneDest;
-        if (options.rcloneDestUuid) {
-          const id = generate();
-          rcloneDest = join(rcloneDest, id);
-        }
-        console.log("Copying output to rclone destination:", rcloneDest);
-        try {
-          await rcloneCopy(destination, rcloneDest, options.rcloneOverwrite);
-          console.log(`\nCopied output:\n\n${rcloneDest}`);
-          // Get the input filename without extension to construct playlist.m3u8 path
-          const inputFilename = new URL(inputVideo, `file://${Deno.cwd()}/`)
-            .pathname.split("/").pop()?.split(".")[0];
-          if (inputFilename) {
-            const playlistPath = join(
-              rcloneDest,
-              inputFilename,
-              PLAYLIST_FILENAME,
-            );
-            console.log(playlistPath);
-          }
-        } catch (error) {
-          console.error("Error copying to rclone destination:", error);
-          // Don't exit here - the transcoding was successful
-        }
-      }
-
       // Generate HTML player
       if (inputFilename) {
         const playlistM3u8Path = join(
@@ -134,6 +106,29 @@ const command = new Command()
           console.log(`Generated HTML player at: ${outputFile}`);
           console.log(`Copied hls.min.js to: ${hlsDestination}`);
           startHtmlServer(outputFile);
+
+          // If rclone destination is provided, copy the output after HTML generation
+          if (options.rcloneDest) {
+            let rcloneDest = options.rcloneDest;
+            if (options.rcloneDestUuid) {
+              const id = generate();
+              rcloneDest = join(rcloneDest, id);
+            }
+            console.log("Copying output to rclone destination:", rcloneDest);
+            try {
+              await rcloneCopy(destination, rcloneDest, options.rcloneOverwrite);
+              console.log(`\nCopied output:\n\n${rcloneDest}`);
+              const playlistPath = join(
+                rcloneDest,
+                inputFilename,
+                PLAYLIST_FILENAME,
+              );
+              console.log(playlistPath);
+            } catch (error) {
+              console.error("Error copying to rclone destination:", error);
+              // Don't exit here - the transcoding was successful
+            }
+          }
         } catch (error) {
           console.error("Error generating HTML player:", error);
           // Don't exit here - the transcoding was successful
