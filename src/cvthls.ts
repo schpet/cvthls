@@ -78,6 +78,10 @@ const command = new Command()
       }
 
       const inputUrl = new URL(inputVideo, `file://${Deno.cwd()}/`);
+      const inputFilename = inputUrl.pathname.split("/").pop()?.split(".")[0];
+      if (!inputFilename) {
+        throw new Error("Could not determine input filename");
+      }
       const playlistPath = join(destination, inputFilename, PLAYLIST_FILENAME);
       await process_presets(inputUrl, destination, options.preset, playlistPath);
 
@@ -110,9 +114,6 @@ const command = new Command()
       }
 
       // Generate HTML player
-      const inputFilename = new URL(inputVideo, `file://${Deno.cwd()}/`)
-        .pathname.split("/").pop()?.split(".")[0];
-
       if (inputFilename) {
         const playlistM3u8Path = join(
           destination,
