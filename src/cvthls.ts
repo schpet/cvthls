@@ -112,7 +112,7 @@ const command = new Command()
 
       if (inputFilename) {
         const masterM3u8Path = join(destination, inputFilename, "master.m3u8");
-        const htmlOutputPath = join(destination, "player.html");
+        const htmlOutputPath = join(destination, inputFilename, "player.html");
 
         try {
           const { outputFile, hlsDestination } = await generateHtmlPlayer(masterM3u8Path, htmlOutputPath);
