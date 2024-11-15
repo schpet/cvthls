@@ -1,6 +1,7 @@
 import { Command } from "@cliffy/command";
 
 const PLAYLIST_FILENAME = "playlist.m3u8";
+const PLAYER_FILENAME = "player.html";
 import { join } from "@std/path";
 import { ensureDir } from "@std/fs";
 import { serveDir, serveFile } from "@std/http/file-server";
@@ -114,7 +115,7 @@ const command = new Command()
 
       if (inputFilename) {
         const masterM3u8Path = join(destination, inputFilename, PLAYLIST_FILENAME);
-        const htmlOutputPath = join(destination, inputFilename, "player.html");
+        const htmlOutputPath = join(destination, inputFilename, PLAYER_FILENAME);
 
         try {
           const { outputFile, hlsDestination } = await generateHtmlPlayer(masterM3u8Path, htmlOutputPath);
@@ -138,7 +139,7 @@ const command = new Command()
         "Generate an HTML page with HLS video player from local m3u8 file",
       )
       .arguments("<m3u8-file:string> [output-file:string]")
-      .action(async (_, m3u8File, outputFile = "player.html") => {
+      .action(async (_, m3u8File, outputFile = PLAYER_FILENAME) => {
         try {
           const { outputFile: htmlFile } = await generateHtmlPlayer(m3u8File, outputFile);
           await startHtmlServer(htmlFile);
