@@ -96,7 +96,7 @@ const command = new Command()
             const masterPlaylistPath = join(
               rcloneDest,
               inputFilename,
-              "master.m3u8",
+              "playlist.m3u8",
             );
             console.log(masterPlaylistPath);
           }
@@ -111,7 +111,7 @@ const command = new Command()
         .pathname.split("/").pop()?.split(".")[0];
 
       if (inputFilename) {
-        const masterM3u8Path = join(destination, inputFilename, "master.m3u8");
+        const masterM3u8Path = join(destination, inputFilename, "playlist.m3u8");
         const htmlOutputPath = join(destination, inputFilename, "player.html");
 
         try {
