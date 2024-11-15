@@ -109,15 +109,16 @@ const command = new Command()
       // Generate HTML player
       const inputFilename = new URL(inputVideo, `file://${Deno.cwd()}/`)
         .pathname.split("/").pop()?.split(".")[0];
-      
+
       if (inputFilename) {
         const masterM3u8Path = join(destination, inputFilename, "master.m3u8");
         const htmlOutputPath = join(destination, "player.html");
-        
+
         try {
           const { outputFile, hlsDestination } = await generateHtmlPlayer(masterM3u8Path, htmlOutputPath);
           console.log(`Generated HTML player at: ${outputFile}`);
           console.log(`Copied hls.min.js to: ${hlsDestination}`);
+          await startHtmlServer(outputFile);
         } catch (error) {
           console.error("Error generating HTML player:", error);
           // Don't exit here - the transcoding was successful
