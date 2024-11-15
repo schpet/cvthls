@@ -1,8 +1,7 @@
 import { Command, EnumType } from "@cliffy/command";
 import { Eta } from "@eta-dev/eta";
-import { dirname } from "@std/path";
+import { dirname, join, relative } from "@std/path";
 import { ensureDir } from "@std/fs";
-import { join } from "@std/path";
 import { serveDir, serveFile } from "@std/http/file-server";
 import {
   PRESET_CONFIGS,
@@ -114,16 +113,34 @@ const command = new Command()
   .command(
     "html",
     new Command()
-      .description("Generate an HTML page with HLS video player")
-      .arguments("<m3u8-url:string> [output-file:string]")
-      .action(async (_, m3u8Url, outputFile = "player.html") => {
+      .description("Generate an HTML page with HLS video player from local m3u8 file")
+      .arguments("<m3u8-file:string> [output-file:string]")
+      .action(async (_, m3u8File, outputFile = "player.html") => {
+        // Verify m3u8 file exists
+        try {
+          const stat = await Deno.stat(m3u8File);
+          if (!stat.isFile) {
+            throw new Error("M3U8 path exists but is not a file");
+          }
+        } catch (error) {
+          if (error instanceof Deno.errors.NotFound) {
+            throw new Error(`M3U8 file not found: ${m3u8File}`);
+          }
+          throw error;
+        }
+
+        // Calculate relative path from output HTML to m3u8 file
+        const m3u8Relative = join(
+          "..",
+          relative(dirname(outputFile), m3u8File)
+        );
         try {
           const templatesDir = dirname(
             new URL("./templates/player.eta", import.meta.url).pathname,
           );
           const eta = new Eta({ views: templatesDir });
 
-          const result = eta.render("./player", { videoSrc: m3u8Url });
+          const result = eta.render("./player", { videoSrc: m3u8Relative });
 
           await Deno.writeTextFile(outputFile, result);
 
