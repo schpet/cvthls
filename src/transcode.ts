@@ -1,5 +1,5 @@
 import { mkdir, writeFile } from "node:fs/promises";
-import ffmpeg, { FfprobeData, FfprobeStream } from "fluent-ffmpeg";
+import ffmpeg  from "fluent-ffmpeg";
 import { basename, extname } from "node:path";
 import { getResolution } from "./utils.ts";
 
@@ -138,7 +138,7 @@ async function transcode(
         bitrate: preset.bitrate,
       });
     })
-    .on("error", (err: Error, stdout: string, stderr: string) => {
+    .on("error", (err: Error, _stdout: string, stderr: string) => {
       console.error(`${preset.resolution}p error`);
       console.error(err);
       // console.error(stdout);
