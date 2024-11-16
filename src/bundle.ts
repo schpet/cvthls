@@ -1,5 +1,5 @@
-import * as esbuild from "npm:esbuild";
-import { denoPlugins } from "jsr:@luca/esbuild-deno-loader";
+import * as esbuild from "esbuild";
+import { denoPlugins } from "@luca/esbuild-deno-loader";
 import { ensureDir } from "@std/fs";
 
 export async function bundleJs(outputDir: string) {
