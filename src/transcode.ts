@@ -149,7 +149,7 @@ async function process_presets(
   input: URL,
   outputDir: string,
   presetConfig: PresetConfig = "standard",
-  playlistPath: URL,
+  playlistFilename: string,
 ) {
   console.time("process_presets");
   const results: TranscodeResult[] = [];
@@ -160,7 +160,7 @@ async function process_presets(
     results.push(transcode_result);
   }
   const playlist = generate_playlist(results);
-  await Deno.writeTextFile(playlistPath, playlist);
+  await Deno.writeTextFile(join(outputDir, playlistFilename), playlist);
   console.timeEnd("process_presets");
 }
 

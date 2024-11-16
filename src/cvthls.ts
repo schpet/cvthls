@@ -77,12 +77,11 @@ const command = new Command()
     }
 
     const inputUrl = new URL(inputVideo, `file://${Deno.cwd()}/`);
-    const playlistPath = join(destination, PLAYLIST_FILENAME);
     await process_presets(
       inputUrl,
       destination,
       options.preset,
-      playlistPath,
+      PLAYLIST_FILENAME,
     );
 
     // Generate HTML player
