@@ -23,6 +23,7 @@
     </style>
     <script>
         window.addEventListener('DOMContentLoaded', () => {
+          console.log('hi')
             const video = document.querySelector('hls-video');
             const player = document.querySelector('media-player');
 
