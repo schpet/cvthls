@@ -2,7 +2,7 @@ import { Command } from "@cliffy/command";
 
 const PLAYLIST_FILENAME = "playlist.m3u8";
 const PLAYER_FILENAME = "player.html";
-import { basename, join } from "@std/path";
+import { join } from "@std/path";
 import { ensureDir } from "@std/fs";
 import {
   PRESET_CONFIGS,
