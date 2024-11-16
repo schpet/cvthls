@@ -1,11 +1,19 @@
 import { Command } from "@cliffy/command";
-import { ensureDir } from "@std/fs";
-import { join } from "@std/path";
-import { PRESET_CONFIGS, PresetConfig, process_presets } from "./transcode.ts";
-import { rcloneCopy } from "./utils.ts";
-import { generate, validate } from "@std/uuid/unstable-v7";
 
-await new Command()
+const PLAYLIST_FILENAME = "playlist.m3u8";
+const PLAYER_FILENAME = "player.html";
+import { join } from "@std/path";
+import { ensureDir } from "@std/fs";
+import {
+  PRESET_CONFIGS,
+  type PresetConfig,
+  process_presets,
+} from "./transcode.ts";
+import { rcloneCopy } from "./utils.ts";
+import { generateHtmlPlayer, startHtmlServer } from "./html.ts";
+import { generate } from "@std/uuid/unstable-v7";
+
+const command = new Command()
   .name("cvthls")
   .version("0.1.0")
   .description("Converts video to stream")
@@ -55,24 +63,42 @@ await new Command()
     console.log("Input video:", inputVideo);
     console.log("Destination:", destination);
 
+    // Check if input file exists
     try {
-      // Check if input file exists
-      try {
-        const stat = await Deno.stat(inputVideo);
-        if (!stat.isFile) {
-          throw new Error("Input path exists but is not a file");
-        }
-      } catch (error) {
-        if (error instanceof Deno.errors.NotFound) {
-          throw new Error(`Input file not found: ${inputVideo}`);
-        }
-        throw error;
+      const stat = await Deno.stat(inputVideo);
+      if (!stat.isFile) {
+        throw new Error("Input path exists but is not a file");
       }
+    } catch (error) {
+      if (error instanceof Deno.errors.NotFound) {
+        throw new Error(`Input file not found: ${inputVideo}`);
+      }
+      throw error;
+    }
 
-      const inputUrl = new URL(inputVideo, `file://${Deno.cwd()}/`);
-      await process_presets(inputUrl, destination, options.preset);
+    const inputUrl = new URL(inputVideo, `file://${Deno.cwd()}/`);
+    await process_presets(
+      inputUrl,
+      destination,
+      options.preset,
+      PLAYLIST_FILENAME,
+    );
 
-      // If rclone destination is provided, copy the output
+    // Generate HTML player
+    const playlistM3u8Path = join(destination, PLAYLIST_FILENAME);
+    const htmlOutputPath = join(destination, PLAYER_FILENAME);
+
+    try {
+      const { outputFile } = await generateHtmlPlayer(
+        playlistM3u8Path,
+        htmlOutputPath,
+      );
+      console.log(`Generated HTML player at: ${outputFile}`);
+      console.log(
+        `\nTo view the player, run:\n  cvthls serve "${outputFile}"`,
+      );
+
+      // If rclone destination is provided, copy the output after HTML generation
       if (options.rcloneDest) {
         let rcloneDest = options.rcloneDest;
         if (options.rcloneDestUuid) {
@@ -81,27 +107,71 @@ await new Command()
         }
         console.log("Copying output to rclone destination:", rcloneDest);
         try {
-          await rcloneCopy(destination, rcloneDest, options.rcloneOverwrite);
-          console.log(`\nCopied output:\n\n${rcloneDest}`);
-          // Get the input filename without extension to construct master.m3u8 path
-          const inputFilename = new URL(inputVideo, `file://${Deno.cwd()}/`)
-            .pathname.split("/").pop()?.split(".")[0];
-          if (inputFilename) {
-            const masterPlaylistPath = join(
-              rcloneDest,
-              inputFilename,
-              "master.m3u8",
-            );
-            console.log(masterPlaylistPath);
-          }
+          await rcloneCopy(
+            destination,
+            rcloneDest,
+            options.rcloneOverwrite,
+          );
+          console.log("Copied output: ", rcloneDest);
         } catch (error) {
           console.error("Error copying to rclone destination:", error);
           // Don't exit here - the transcoding was successful
         }
       }
     } catch (error) {
-      console.error("Error processing video:", error);
-      Deno.exit(1);
+      console.error("Error generating HTML player:", error);
+      // Don't exit here - the transcoding was successful
     }
   })
-  .parse(Deno.args);
+  .command(
+    "html",
+    new Command()
+      .description(
+        "Generate an HTML page with HLS video player from local m3u8 file",
+      )
+      .arguments("<m3u8-file:string> [output-file:string]")
+      .action(async (_, m3u8File, outputFile = PLAYER_FILENAME) => {
+        try {
+          const { outputFile: htmlFile } = await generateHtmlPlayer(
+            m3u8File,
+            outputFile,
+          );
+          console.log(`Generated HTML player at: ${htmlFile}`);
+          console.log(
+            `\nTo view the player, run:\n  cvthls serve "${htmlFile}"`,
+          );
+        } catch (error) {
+          console.error("Error generating HTML:", error);
+          Deno.exit(1);
+        }
+      }),
+  )
+  .command(
+    "serve",
+    new Command()
+      .description("Start HTTP server for an existing player.html file")
+      .arguments("<player-file:string>")
+      .action(async (_, playerFile) => {
+        try {
+          // Check if input file exists
+          try {
+            const stat = await Deno.stat(playerFile);
+            if (!stat.isFile) {
+              throw new Error("Player file path exists but is not a file");
+            }
+          } catch (error) {
+            if (error instanceof Deno.errors.NotFound) {
+              throw new Error(`Player file not found: ${playerFile}`);
+            }
+            throw error;
+          }
+
+          startHtmlServer(playerFile);
+        } catch (error) {
+          console.error("Error serving player:", error);
+          Deno.exit(1);
+        }
+      }),
+  );
+
+await command.parse(Deno.args);

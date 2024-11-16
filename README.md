@@ -10,6 +10,11 @@ adapted from
 > project is very much WIP, mostly just an excuse to mess around with deno and
 > jsr
 
+## prerquisites
+
+- ffmpeg
+- rclone (if using rclone to upload to a storage system like R2)
+
 ## usage
 
 ```bash

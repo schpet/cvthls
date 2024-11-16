@@ -1,6 +1,6 @@
-import { mkdir, writeFile } from "node:fs/promises";
-import ffmpeg, { FfprobeData, FfprobeStream } from "fluent-ffmpeg";
-import { basename, extname } from "node:path";
+import { ensureDir } from "@std/fs";
+import ffmpeg from "fluent-ffmpeg";
+import { basename, join } from "@std/path";
 import { getResolution } from "./utils.ts";
 
 type Preset = {
@@ -25,7 +25,7 @@ export const PRESET_CONFIGS = {
 
 export type PresetConfig = keyof typeof PRESET_CONFIGS;
 
-async function generate_playlist(transcode_results: TranscodeResult[]) {
+function generate_playlist(transcode_results: TranscodeResult[]) {
   const playlist = [`#EXTM3U`, `#EXT-X-VERSION:3`];
   for (const result of transcode_results) {
     console.log(
@@ -40,6 +40,7 @@ async function generate_playlist(transcode_results: TranscodeResult[]) {
   }
   return playlist.join("\n");
 }
+
 type TranscodeResult = {
   width: number;
   height: number;
@@ -53,14 +54,8 @@ async function transcode(
   outputDir: string,
   preset: Preset,
 ): Promise<TranscodeResult> {
-  const input_extension = extname(input.pathname);
-  const input_filename = decodeURI(basename(input.pathname, input_extension));
-  const output_folder = `${outputDir}/${input_filename}`;
-  const m3u8_path =
-    `${output_folder}/${input_filename}_${preset.resolution}p.m3u8`;
-  console.log({ input_filename, output_folder });
-  console.log(`transcoding ${input.pathname} to ${preset.resolution}p`);
-  await mkdir(output_folder, { recursive: true });
+  const m3u8_path = join(outputDir, `${preset.resolution}p.m3u8`);
+  await ensureDir(outputDir);
   const { promise, resolve, reject } = Promise.withResolvers<TranscodeResult>();
   ffmpeg(decodeURI(input.pathname))
     // .videoCodec('h264_videotoolbox')
@@ -113,10 +108,10 @@ async function transcode(
       "-vsync",
       "1",
       "-hls_segment_filename",
-      `${output_folder}/${input_filename}_${preset.resolution}_%03d.ts`,
+      `${outputDir}/${preset.resolution}p_%03d.ts`,
     ])
     .output(m3u8_path)
-    .on("start", (cmdline: string) => {
+    .on("start", () => {
       console.log(`${preset.resolution}p start`);
       // console.log(cmdline)
     })
@@ -138,7 +133,7 @@ async function transcode(
         bitrate: preset.bitrate,
       });
     })
-    .on("error", (err: Error, stdout: string, stderr: string) => {
+    .on("error", (err: Error, _stdout: string, stderr: string) => {
       console.error(`${preset.resolution}p error`);
       console.error(err);
       // console.error(stdout);
@@ -154,10 +149,9 @@ async function process_presets(
   input: URL,
   outputDir: string,
   presetConfig: PresetConfig = "standard",
+  playlistFilename: string,
 ) {
   console.time("process_presets");
-  const input_extension = extname(input.pathname);
-  const input_filename = decodeURI(basename(input.pathname, input_extension));
   const results: TranscodeResult[] = [];
   for (const preset of PRESET_CONFIGS[presetConfig]) {
     console.timeLog("process_presets", `transcoding ${preset.resolution}p`);
@@ -165,8 +159,8 @@ async function process_presets(
     console.log(transcode_result);
     results.push(transcode_result);
   }
-  const playlist = await generate_playlist(results);
-  await writeFile(`${outputDir}/${input_filename}/master.m3u8`, playlist);
+  const playlist = generate_playlist(results);
+  await Deno.writeTextFile(join(outputDir, playlistFilename), playlist);
   console.timeEnd("process_presets");
 }
 
