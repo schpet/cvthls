@@ -21,6 +21,41 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
     </style>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const video = document.querySelector('hls-video');
+            const player = document.querySelector('media-player');
+
+            // Log video events
+            ['loadstart', 'loadedmetadata', 'canplay', 'playing', 'error'].forEach(eventName => {
+                video.addEventListener(eventName, (e) => {
+                    console.log(`Video event: ${eventName}`, e);
+                });
+            });
+
+            // Log video errors
+            video.addEventListener('error', (e) => {
+                console.error('Video error:', {
+                    error: video.error,
+                    networkState: video.networkState,
+                    readyState: video.readyState,
+                    currentSrc: video.currentSrc
+                });
+            });
+
+            // Log when source changes
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'src') {
+                        console.log('Source changed:', video.src);
+                    }
+                });
+            });
+            observer.observe(video, { attributes: true });
+
+            console.log('Initial video source:', video.src);
+        });
+    </script>
 </head>
 <body>
     <media-player>
