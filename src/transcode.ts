@@ -1,8 +1,7 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { ensureDir } from "@std/fs";
 import ffmpeg from "fluent-ffmpeg";
-import { basename, extname } from "node:path";
+import { basename, extname, join } from "@std/path";
 import { getResolution } from "./utils.ts";
-import { join } from "@std/path";
 
 type Preset = {
   resolution: number;
@@ -59,7 +58,7 @@ async function transcode(
   const input_filename = decodeURI(basename(input.pathname, input_extension));
   const output_folder = join(outputDir, input_filename);
   const m3u8_path = join(output_folder, `${input_filename}_${preset.resolution}p.m3u8`);
-  await mkdir(output_folder, { recursive: true });
+  await ensureDir(output_folder);
   const { promise, resolve, reject } = Promise.withResolvers<TranscodeResult>();
   ffmpeg(decodeURI(input.pathname))
     // .videoCodec('h264_videotoolbox')
@@ -164,7 +163,7 @@ async function process_presets(
     results.push(transcode_result);
   }
   const playlist = generate_playlist(results);
-  await writeFile(playlistPath, playlist);
+  await Deno.writeTextFile(playlistPath, playlist);
   console.timeEnd("process_presets");
 }
 
