@@ -2,7 +2,7 @@ entry := "src/cvthls.ts"
 
 sample preset = "fast":
     rm -rf output/sample
-    just run ./input/sample.mp4 ./output  --preset {{preset}}
+    just run ./input/sample.mp4 ./output/sample --preset {{preset}}
     just run serve output/sample/player.html
 
 sample-standard:
