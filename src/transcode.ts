@@ -166,7 +166,7 @@ async function process_presets(
     console.log(transcode_result);
     results.push(transcode_result);
   }
-  const playlist = await generate_playlist(results);
+  const playlist = generate_playlist(results);
   const finalPlaylistPath = playlistPath ??
     `${outputDir}/${input_filename}/master.m3u8`;
   await writeFile(finalPlaylistPath, playlist);
