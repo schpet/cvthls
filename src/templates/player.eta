@@ -2,7 +2,6 @@
 <html>
 <head>
     <title>HLS Video Player</title>
-    <script src="hls.min.js"></script>
     <script type="module" src="https://cdn.jsdelivr.net/npm/media-chrome@1/+esm"></script>
     <style>
         body {
@@ -24,9 +23,11 @@
 </head>
 <body>
     <media-player>
-        <media-provider>
-            <video id="video" slot="media" crossorigin></video>
-        </media-provider>
+        <hls-video
+            src="<%= it.videoSrc %>"
+            crossorigin
+            slot="media"
+        ></hls-video>
 
         <media-control-bar>
             <media-play-button></media-play-button>
@@ -37,19 +38,5 @@
             <media-fullscreen-button></media-fullscreen-button>
         </media-control-bar>
     </media-player>
-
-    <script>
-        const video = document.getElementById('video');
-        const videoSrc = '<%= it.videoSrc %>';
-        
-        if (Hls.isSupported()) {
-            const hls = new Hls();
-            hls.loadSource(videoSrc);
-            hls.attachMedia(video);
-        }
-        else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-            video.src = videoSrc;
-        }
-    </script>
 </body>
 </html>

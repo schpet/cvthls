@@ -30,12 +30,7 @@ export async function generateHtmlPlayer(
 
   await Deno.writeTextFile(outputFile, result);
 
-  // Copy hls.min.js to the same directory as the output file
-  const hlsSource = new URL("../static/hls.min.js", import.meta.url).pathname;
-  const hlsDestination = join(dirname(outputFile), "hls.min.js");
-  await Deno.copyFile(hlsSource, hlsDestination);
-
-  return { outputFile, hlsDestination };
+  return { outputFile };
 }
 
 export function startHtmlServer(outputFile: string, port = 8000) {
