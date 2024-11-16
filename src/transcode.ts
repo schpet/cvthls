@@ -152,7 +152,7 @@ async function process_presets(
   input: URL,
   outputDir: string,
   presetConfig: PresetConfig = "standard",
-  playlistPath: string,
+  playlistPath: URL,
 ) {
   console.time("process_presets");
   const results: TranscodeResult[] = [];
