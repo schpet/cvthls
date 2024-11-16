@@ -1,7 +1,10 @@
 import * as esbuild from "npm:esbuild";
 import { denoPlugins } from "jsr:@luca/esbuild-deno-loader";
+import { ensureDir } from "@std/fs";
 
 export async function bundleJs(outputDir: string) {
+  // Ensure the output directory exists
+  await ensureDir(outputDir);
   const result = await esbuild.build({
     plugins: [...denoPlugins()],
     entryPoints: [{
