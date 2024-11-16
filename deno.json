@@ -16,7 +16,7 @@
     "hls-video-element": "npm:hls-video-element@^1.2.8",
     "media-chrome": "npm:media-chrome@^4.2.3"
   },
-  "version": "0.0.3",
+  "version": "0.0.4",
   "license": "MIT",
   "publish": {
     "include": ["src/**/*", "README.md"]
