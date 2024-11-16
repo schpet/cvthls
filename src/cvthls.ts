@@ -104,12 +104,11 @@ const command = new Command()
         );
 
         try {
-          const { outputFile, hlsDestination } = await generateHtmlPlayer(
+          const { outputFile } = await generateHtmlPlayer(
             playlistM3u8Path,
             htmlOutputPath,
           );
           console.log(`Generated HTML player at: ${outputFile}`);
-          console.log(`Copied hls.min.js to: ${hlsDestination}`);
           console.log(`\nTo view the player, run:\n  cvthls serve "${outputFile}"`);
 
           // If rclone destination is provided, copy the output after HTML generation
