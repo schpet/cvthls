@@ -56,9 +56,8 @@ async function transcode(
 ): Promise<TranscodeResult> {
   const input_extension = extname(input.pathname);
   const input_filename = decodeURI(basename(input.pathname, input_extension));
-  const output_folder = join(outputDir, input_filename);
-  const m3u8_path = join(output_folder, `${input_filename}_${preset.resolution}p.m3u8`);
-  await ensureDir(output_folder);
+  const m3u8_path = join(outputDir, `${input_filename}_${preset.resolution}p.m3u8`);
+  await ensureDir(outputDir);
   const { promise, resolve, reject } = Promise.withResolvers<TranscodeResult>();
   ffmpeg(decodeURI(input.pathname))
     // .videoCodec('h264_videotoolbox')
@@ -111,7 +110,7 @@ async function transcode(
       "-vsync",
       "1",
       "-hls_segment_filename",
-      `${output_folder}/${input_filename}_${preset.resolution}_%03d.ts`,
+      `${outputDir}/${input_filename}_${preset.resolution}_%03d.ts`,
     ])
     .output(m3u8_path)
     .on("start", () => {

@@ -81,7 +81,7 @@ const command = new Command()
     if (!inputFilename) {
       throw new Error("Could not determine input filename");
     }
-    const playlistPath = join(destination, inputFilename, PLAYLIST_FILENAME);
+    const playlistPath = join(destination, PLAYLIST_FILENAME);
     await process_presets(
       inputUrl,
       destination,
@@ -91,16 +91,8 @@ const command = new Command()
 
     // Generate HTML player
     if (inputFilename) {
-      const playlistM3u8Path = join(
-        destination,
-        inputFilename,
-        PLAYLIST_FILENAME,
-      );
-      const htmlOutputPath = join(
-        destination,
-        inputFilename,
-        PLAYER_FILENAME,
-      );
+      const playlistM3u8Path = join(destination, PLAYLIST_FILENAME);
+      const htmlOutputPath = join(destination, PLAYER_FILENAME);
 
       try {
         const { outputFile } = await generateHtmlPlayer(
