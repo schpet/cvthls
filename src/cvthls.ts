@@ -89,40 +89,39 @@ const command = new Command()
     const playlistM3u8Path = join(destination, PLAYLIST_FILENAME);
     const htmlOutputPath = join(destination, PLAYER_FILENAME);
 
-      try {
-        const { outputFile } = await generateHtmlPlayer(
-          playlistM3u8Path,
-          htmlOutputPath,
-        );
-        console.log(`Generated HTML player at: ${outputFile}`);
-        console.log(
-          `\nTo view the player, run:\n  cvthls serve "${outputFile}"`,
-        );
+    try {
+      const { outputFile } = await generateHtmlPlayer(
+        playlistM3u8Path,
+        htmlOutputPath,
+      );
+      console.log(`Generated HTML player at: ${outputFile}`);
+      console.log(
+        `\nTo view the player, run:\n  cvthls serve "${outputFile}"`,
+      );
 
-        // If rclone destination is provided, copy the output after HTML generation
-        if (options.rcloneDest) {
-          let rcloneDest = options.rcloneDest;
-          if (options.rcloneDestUuid) {
-            const id = generate();
-            rcloneDest = join(rcloneDest, id);
-          }
-          console.log("Copying output to rclone destination:", rcloneDest);
-          try {
-            await rcloneCopy(
-              destination,
-              rcloneDest,
-              options.rcloneOverwrite,
-            );
-            console.log("Copied output: ", rcloneDest);
-          } catch (error) {
-            console.error("Error copying to rclone destination:", error);
-            // Don't exit here - the transcoding was successful
-          }
+      // If rclone destination is provided, copy the output after HTML generation
+      if (options.rcloneDest) {
+        let rcloneDest = options.rcloneDest;
+        if (options.rcloneDestUuid) {
+          const id = generate();
+          rcloneDest = join(rcloneDest, id);
         }
-      } catch (error) {
-        console.error("Error generating HTML player:", error);
-        // Don't exit here - the transcoding was successful
+        console.log("Copying output to rclone destination:", rcloneDest);
+        try {
+          await rcloneCopy(
+            destination,
+            rcloneDest,
+            options.rcloneOverwrite,
+          );
+          console.log("Copied output: ", rcloneDest);
+        } catch (error) {
+          console.error("Error copying to rclone destination:", error);
+          // Don't exit here - the transcoding was successful
+        }
       }
+    } catch (error) {
+      console.error("Error generating HTML player:", error);
+      // Don't exit here - the transcoding was successful
     }
   })
   .command(
