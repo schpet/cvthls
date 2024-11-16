@@ -21,10 +21,10 @@ check:
     deno check cvthls.ts
 
 test-rclone:
-    just run ./input/sample.mp4 --rclone-dest "r2files:streaming-video/cvthls" --rclone-overwrite
+    just run ./input/sample.mp4 --rclone-dest "r2files:streaming-video/cvthls/test" --rclone-overwrite
 
 test-rclone-u:
-    just run ./input/sample.mp4 --preset fast --rclone-dest "r2files:streaming-video/cvthls" -u
+    just run ./input/sample.mp4 --preset fast --rclone-dest "r2files:streaming-video/cvthls/test" -u
 
 test-input-only:
     just run ./input/sample.mp4
