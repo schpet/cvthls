@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>HLS Video Player</title>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/media-chrome@1/+esm"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/media-chrome@4/+esm"></script>
     <script type="module" src="https://cdn.jsdelivr.net/npm/hls-video-element@1.2/+esm"></script>
     <style>
         body {
@@ -23,7 +23,6 @@
     </style>
     <script>
         window.addEventListener('DOMContentLoaded', () => {
-          console.log('hi')
             const video = document.querySelector('hls-video');
             const player = document.querySelector('media-player');
 
@@ -59,10 +58,9 @@
     </script>
 </head>
 <body>
-    <media-player>
+    <media-controller>
         <hls-video
             src="<%= it.videoSrc %>"
-            crossorigin
             slot="media"
         ></hls-video>
 
@@ -78,6 +76,6 @@
             <media-playback-rate-button></media-playback-rate-button>
             <media-fullscreen-button></media-fullscreen-button>
         </media-control-bar>
-    </media-player>
+    </media-controller>
 </body>
 </html>

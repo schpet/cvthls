@@ -1,13 +1,12 @@
 entry := "src/cvthls.ts"
 
 default:
+    rm -rf output/sample
     just run ./input/sample.mp4 ./output  --preset fast
+    just run serve output/sample/player.html
 
 run *ARGS:
     deno run --allow-net --allow-env --allow-read --allow-write --allow-sys --allow-run {{entry}} {{ARGS}}
-
-serve:
-    just run serve output/sample/player.html
 
 compile:
     deno compile --allow-env --allow-read --allow-write --allow-sys --allow-run {{entry}}
