@@ -63,82 +63,79 @@ const command = new Command()
     console.log("Input video:", inputVideo);
     console.log("Destination:", destination);
 
+    // Check if input file exists
     try {
-      // Check if input file exists
-      try {
-        const stat = await Deno.stat(inputVideo);
-        if (!stat.isFile) {
-          throw new Error("Input path exists but is not a file");
-        }
-      } catch (error) {
-        if (error instanceof Deno.errors.NotFound) {
-          throw new Error(`Input file not found: ${inputVideo}`);
-        }
-        throw error;
-      }
-
-      const inputUrl = new URL(inputVideo, `file://${Deno.cwd()}/`);
-      const inputFilename = inputUrl.pathname.split("/").pop()?.split(".")[0];
-      if (!inputFilename) {
-        throw new Error("Could not determine input filename");
-      }
-      const playlistPath = join(destination, inputFilename, PLAYLIST_FILENAME);
-      await process_presets(
-        inputUrl,
-        destination,
-        options.preset,
-        playlistPath,
-      );
-
-      // Generate HTML player
-      if (inputFilename) {
-        const playlistM3u8Path = join(
-          destination,
-          inputFilename,
-          PLAYLIST_FILENAME,
-        );
-        const htmlOutputPath = join(
-          destination,
-          inputFilename,
-          PLAYER_FILENAME,
-        );
-
-        try {
-          const { outputFile } = await generateHtmlPlayer(
-            playlistM3u8Path,
-            htmlOutputPath,
-          );
-          console.log(`Generated HTML player at: ${outputFile}`);
-          console.log(`\nTo view the player, run:\n  cvthls serve "${outputFile}"`);
-
-          // If rclone destination is provided, copy the output after HTML generation
-          if (options.rcloneDest) {
-            let rcloneDest = options.rcloneDest;
-            if (options.rcloneDestUuid) {
-              const id = generate();
-              rcloneDest = join(rcloneDest, id);
-            }
-            console.log("Copying output to rclone destination:", rcloneDest);
-            try {
-              await rcloneCopy(
-                destination,
-                rcloneDest,
-                options.rcloneOverwrite,
-              );
-              console.log("Copied output: ", rcloneDest);
-            } catch (error) {
-              console.error("Error copying to rclone destination:", error);
-              // Don't exit here - the transcoding was successful
-            }
-          }
-        } catch (error) {
-          console.error("Error generating HTML player:", error);
-          // Don't exit here - the transcoding was successful
-        }
+      const stat = await Deno.stat(inputVideo);
+      if (!stat.isFile) {
+        throw new Error("Input path exists but is not a file");
       }
     } catch (error) {
-      console.error("Error processing video:", error);
-      Deno.exit(1);
+      if (error instanceof Deno.errors.NotFound) {
+        throw new Error(`Input file not found: ${inputVideo}`);
+      }
+      throw error;
+    }
+
+    const inputUrl = new URL(inputVideo, `file://${Deno.cwd()}/`);
+    const inputFilename = inputUrl.pathname.split("/").pop()?.split(".")[0];
+    if (!inputFilename) {
+      throw new Error("Could not determine input filename");
+    }
+    const playlistPath = join(destination, inputFilename, PLAYLIST_FILENAME);
+    await process_presets(
+      inputUrl,
+      destination,
+      options.preset,
+      playlistPath,
+    );
+
+    // Generate HTML player
+    if (inputFilename) {
+      const playlistM3u8Path = join(
+        destination,
+        inputFilename,
+        PLAYLIST_FILENAME,
+      );
+      const htmlOutputPath = join(
+        destination,
+        inputFilename,
+        PLAYER_FILENAME,
+      );
+
+      try {
+        const { outputFile } = await generateHtmlPlayer(
+          playlistM3u8Path,
+          htmlOutputPath,
+        );
+        console.log(`Generated HTML player at: ${outputFile}`);
+        console.log(
+          `\nTo view the player, run:\n  cvthls serve "${outputFile}"`,
+        );
+
+        // If rclone destination is provided, copy the output after HTML generation
+        if (options.rcloneDest) {
+          let rcloneDest = options.rcloneDest;
+          if (options.rcloneDestUuid) {
+            const id = generate();
+            rcloneDest = join(rcloneDest, id);
+          }
+          console.log("Copying output to rclone destination:", rcloneDest);
+          try {
+            await rcloneCopy(
+              destination,
+              rcloneDest,
+              options.rcloneOverwrite,
+            );
+            console.log("Copied output: ", rcloneDest);
+          } catch (error) {
+            console.error("Error copying to rclone destination:", error);
+            // Don't exit here - the transcoding was successful
+          }
+        }
+      } catch (error) {
+        console.error("Error generating HTML player:", error);
+        // Don't exit here - the transcoding was successful
+      }
     }
   })
   .command(
@@ -155,7 +152,9 @@ const command = new Command()
             outputFile,
           );
           console.log(`Generated HTML player at: ${htmlFile}`);
-          console.log(`\nTo view the player, run:\n  cvthls serve "${htmlFile}"`);
+          console.log(
+            `\nTo view the player, run:\n  cvthls serve "${htmlFile}"`,
+          );
         } catch (error) {
           console.error("Error generating HTML:", error);
           Deno.exit(1);
