@@ -1,6 +1,7 @@
 import { Eta } from "@eta-dev/eta";
 import { dirname, join, relative } from "@std/path";
 import { serveDir, serveFile } from "@std/http/file-server";
+import { bundleJs } from "./bundle.ts";
 
 export async function generateHtmlPlayer(
   m3u8File: string,
@@ -28,6 +29,10 @@ export async function generateHtmlPlayer(
 
   const result = eta.render("./player", { videoSrc: m3u8Relative });
 
+  // Bundle JavaScript
+  const outputDir = dirname(outputFile);
+  await bundleJs(outputDir);
+  
   await Deno.writeTextFile(outputFile, result);
 
   return { outputFile };
