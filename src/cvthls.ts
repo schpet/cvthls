@@ -110,7 +110,7 @@ const command = new Command()
           );
           console.log(`Generated HTML player at: ${outputFile}`);
           console.log(`Copied hls.min.js to: ${hlsDestination}`);
-          startHtmlServer(outputFile);
+          console.log(`\nTo view the player, run:\n  cvthls serve "${outputFile}"`);
 
           // If rclone destination is provided, copy the output after HTML generation
           if (options.rcloneDest) {
@@ -155,7 +155,8 @@ const command = new Command()
             m3u8File,
             outputFile,
           );
-          startHtmlServer(htmlFile);
+          console.log(`Generated HTML player at: ${htmlFile}`);
+          console.log(`\nTo view the player, run:\n  cvthls serve "${htmlFile}"`);
         } catch (error) {
           console.error("Error generating HTML:", error);
           Deno.exit(1);
