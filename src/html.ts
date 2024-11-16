@@ -1,5 +1,6 @@
 import { Eta } from "@eta-dev/eta";
 import { dirname, relative } from "@std/path";
+import { ensureDir } from "@std/fs";
 import { serveDir, serveFile } from "@std/http/file-server";
 import { bundleJs } from "./bundle.ts";
 
@@ -31,6 +32,7 @@ export async function generateHtmlPlayer(
 
   // Bundle JavaScript
   const outputDir = dirname(outputFile);
+  await ensureDir(outputDir);
   await bundleJs(outputDir);
 
   await Deno.writeTextFile(outputFile, result);
