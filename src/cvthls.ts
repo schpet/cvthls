@@ -161,6 +161,33 @@ const command = new Command()
           Deno.exit(1);
         }
       }),
+  )
+  .command(
+    "serve",
+    new Command()
+      .description("Start HTTP server for an existing player.html file")
+      .arguments("<player-file:string>")
+      .action(async (_, playerFile) => {
+        try {
+          // Check if input file exists
+          try {
+            const stat = await Deno.stat(playerFile);
+            if (!stat.isFile) {
+              throw new Error("Player file path exists but is not a file");
+            }
+          } catch (error) {
+            if (error instanceof Deno.errors.NotFound) {
+              throw new Error(`Player file not found: ${playerFile}`);
+            }
+            throw error;
+          }
+
+          startHtmlServer(playerFile);
+        } catch (error) {
+          console.error("Error serving player:", error);
+          Deno.exit(1);
+        }
+      }),
   );
 
 await command.parse(Deno.args);
