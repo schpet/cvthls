@@ -3,6 +3,7 @@
 <head>
     <title>HLS Video Player</title>
     <script type="module" src="https://cdn.jsdelivr.net/npm/media-chrome@1/+esm"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/hls-video-element@1.2/+esm"></script>
     <style>
         body {
             margin: 0;
@@ -30,12 +31,14 @@
         ></hls-video>
 
         <media-control-bar>
-            <media-play-button></media-play-button>
-            <media-time-range></media-time-range>
-            <media-time-display></media-time-display>
-            <media-mute-button></media-mute-button>
-            <media-volume-range></media-volume-range>
-            <media-fullscreen-button></media-fullscreen-button>
+          <media-play-button></media-play-button>
+          <media-mute-button></media-mute-button>
+          <media-time-range></media-time-range>
+          <media-time-display showduration remaining></media-time-display>
+          <media-playback-rate-button></media-playback-rate-button>
+          <media-fullscreen-button></media-fullscreen-button>
+          <!-- <media-airplay-button></media-airplay-button> -->
+          <media-rendition-menu-button></media-rendition-menu-button>
         </media-control-bar>
     </media-player>
 </body>

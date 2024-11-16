@@ -6,6 +6,9 @@ default:
 run *ARGS:
     deno run --allow-net --allow-env --allow-read --allow-write --allow-sys --allow-run {{entry}} {{ARGS}}
 
+serve:
+    just run serve output/sample/player.html
+
 compile:
     deno compile --allow-env --allow-read --allow-write --allow-sys --allow-run {{entry}}
 
