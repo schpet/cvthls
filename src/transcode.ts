@@ -1,7 +1,8 @@
 import { mkdir, writeFile } from "node:fs/promises";
-import ffmpeg  from "fluent-ffmpeg";
+import ffmpeg from "fluent-ffmpeg";
 import { basename, extname } from "node:path";
 import { getResolution } from "./utils.ts";
+import { join } from "@std/path";
 
 type Preset = {
   resolution: number;
@@ -40,6 +41,7 @@ function generate_playlist(transcode_results: TranscodeResult[]) {
   }
   return playlist.join("\n");
 }
+
 type TranscodeResult = {
   width: number;
   height: number;
@@ -55,11 +57,8 @@ async function transcode(
 ): Promise<TranscodeResult> {
   const input_extension = extname(input.pathname);
   const input_filename = decodeURI(basename(input.pathname, input_extension));
-  const output_folder = `${outputDir}/${input_filename}`;
-  const m3u8_path =
-    `${output_folder}/${input_filename}_${preset.resolution}p.m3u8`;
-  console.log({ input_filename, output_folder });
-  console.log(`transcoding ${input.pathname} to ${preset.resolution}p`);
+  const output_folder = join(outputDir, input_filename);
+  const m3u8_path = join(output_folder, `${input_filename}_${preset.resolution}p.m3u8`);
   await mkdir(output_folder, { recursive: true });
   const { promise, resolve, reject } = Promise.withResolvers<TranscodeResult>();
   ffmpeg(decodeURI(input.pathname))
@@ -154,11 +153,9 @@ async function process_presets(
   input: URL,
   outputDir: string,
   presetConfig: PresetConfig = "standard",
-  playlistPath?: string,
+  playlistPath: string,
 ) {
   console.time("process_presets");
-  const input_extension = extname(input.pathname);
-  const input_filename = decodeURI(basename(input.pathname, input_extension));
   const results: TranscodeResult[] = [];
   for (const preset of PRESET_CONFIGS[presetConfig]) {
     console.timeLog("process_presets", `transcoding ${preset.resolution}p`);
@@ -167,9 +164,7 @@ async function process_presets(
     results.push(transcode_result);
   }
   const playlist = generate_playlist(results);
-  const finalPlaylistPath = playlistPath ??
-    `${outputDir}/${input_filename}/master.m3u8`;
-  await writeFile(finalPlaylistPath, playlist);
+  await writeFile(playlistPath, playlist);
   console.timeEnd("process_presets");
 }
 
