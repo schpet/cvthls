@@ -2,7 +2,7 @@ import { Command } from "@cliffy/command";
 
 const PLAYLIST_FILENAME = "playlist.m3u8";
 const PLAYER_FILENAME = "player.html";
-import { join } from "@std/path";
+import { basename, join } from "@std/path";
 import { ensureDir } from "@std/fs";
 import {
   PRESET_CONFIGS,
@@ -77,7 +77,7 @@ const command = new Command()
     }
 
     const inputUrl = new URL(inputVideo, `file://${Deno.cwd()}/`);
-    const inputFilename = inputUrl.pathname.split("/").pop()?.split(".")[0];
+    const inputFilename = basename(inputUrl.pathname, ".mp4");
     if (!inputFilename) {
       throw new Error("Could not determine input filename");
     }
