@@ -20,41 +20,6 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
     </style>
-    <script>
-        window.addEventListener('DOMContentLoaded', () => {
-            const video = document.querySelector('hls-video');
-            const player = document.querySelector('media-player');
-
-            // Log video events
-            ['loadstart', 'loadedmetadata', 'canplay', 'playing', 'error'].forEach(eventName => {
-                video.addEventListener(eventName, (e) => {
-                    console.log(`Video event: ${eventName}`, e);
-                });
-            });
-
-            // Log video errors
-            video.addEventListener('error', (e) => {
-                console.error('Video error:', {
-                    error: video.error,
-                    networkState: video.networkState,
-                    readyState: video.readyState,
-                    currentSrc: video.currentSrc
-                });
-            });
-
-            // Log when source changes
-            const observer = new MutationObserver((mutations) => {
-                mutations.forEach((mutation) => {
-                    if (mutation.type === 'attributes' && mutation.attributeName === 'src') {
-                        console.log('Source changed:', video.src);
-                    }
-                });
-            });
-            observer.observe(video, { attributes: true });
-
-            console.log('Initial video source:', video.src);
-        });
-    </script>
 </head>
 <body>
     <media-controller>
@@ -64,16 +29,35 @@
         ></hls-video>
 
         <media-loading-indicator slot="centered-chrome" noautohide></media-loading-indicator>
+        <media-settings-menu hidden anchor="auto">
+            <media-settings-menu-item>
+              Speed
+              <media-playback-rate-menu slot="submenu" hidden>
+                <div slot="title">Speed</div>
+              </media-playback-rate-menu>
+            </media-settings-menu-item>
+            <media-settings-menu-item>
+              Quality
+              <media-rendition-menu slot="submenu" hidden>
+                <div slot="title">Quality</div>
+              </media-rendition-menu>
+            </media-settings-menu-item>
+            <media-settings-menu-item>
+              Captions
+              <media-captions-menu slot="submenu" hidden>
+                <div slot="title">Captions</div>
+              </media-captions-menu>
+            </media-settings-menu-item>
+          </media-settings-menu>
+
         <media-control-bar>
             <media-play-button></media-play-button>
-            <media-seek-backward-button></media-seek-backward-button>
-            <media-seek-forward-button ></media-seek-forward-button>
             <media-mute-button></media-mute-button>
-            <media-volume-range></media-volume-range>
             <media-time-range></media-time-range>
             <media-time-display showduration remaining></media-time-display>
             <media-playback-rate-button></media-playback-rate-button>
             <media-fullscreen-button></media-fullscreen-button>
+            <media-settings-menu-button></media-settings-menu-button>
         </media-control-bar>
     </media-controller>
 </body>

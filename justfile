@@ -1,9 +1,12 @@
 entry := "src/cvthls.ts"
 
-default:
+sample preset = "fast":
     rm -rf output/sample
-    just run ./input/sample.mp4 ./output  --preset fast
+    just run ./input/sample.mp4 ./output  --preset {{preset}}
     just run serve output/sample/player.html
+
+sample-standard:
+    just sample standard
 
 run *ARGS:
     deno run --allow-net --allow-env --allow-read --allow-write --allow-sys --allow-run {{entry}} {{ARGS}}
