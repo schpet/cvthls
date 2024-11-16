@@ -1,4 +1,4 @@
-import { ensureDir, writeFile } from "@std/fs";
+import { ensureDir } from "@std/fs";
 import ffmpeg from "fluent-ffmpeg";
 import { basename, extname, join } from "@std/path";
 import { getResolution } from "./utils.ts";
@@ -163,7 +163,7 @@ async function process_presets(
     results.push(transcode_result);
   }
   const playlist = generate_playlist(results);
-  await writeFile(playlistPath, playlist);
+  await Deno.writeTextFile(playlistPath, playlist);
   console.timeEnd("process_presets");
 }
 
