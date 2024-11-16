@@ -1,6 +1,6 @@
 import { ensureDir } from "@std/fs";
 import ffmpeg from "fluent-ffmpeg";
-import { basename, extname, join } from "@std/path";
+import { basename, join } from "@std/path";
 import { getResolution } from "./utils.ts";
 
 type Preset = {
